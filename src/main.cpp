@@ -1,37 +1,23 @@
-# 1 "/tmp/tmpJdqObI"
 #include <Arduino.h>
-# 1 "/home/alexandru/work/NodeMCU-test/src/main.ino"
 #include <ESP8266WiFi.h>
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include "WiFiManager.h"
 
-
-
+// Todo: reset wifi
+// https://github.com/esp8266/Arduino/tree/4897e0006b5b0123a2fa31f67b14a3fff65ce561/doc
 
 ADC_MODE(ADC_VCC);
 MDNSResponder mdns;
-ESP8266WebServer server(8080);
+ESP8266WebServer server(8080); // Main webserver
 
 char thingName[] = "AlexThing";
-void configModeCallback (WiFiManager *myWiFiManager);
-void handleRoot();
-void blink();
-void handleNotFound();
-void setup();
-void loop();
-#line 16 "/home/alexandru/work/NodeMCU-test/src/main.ino"
+
 void configModeCallback (WiFiManager *myWiFiManager) {
   Serial.println("Entered config mode");
   Serial.println(WiFi.softAPIP());
   Serial.println(myWiFiManager->getConfigPortalSSID());
-}
-
-void handleRoot() {
-  server.send(200, String("text/plain"), "Hello from: " + String(thingName)
-  + String(ESP.getVcc()) );
-  blink();
 }
 
 void blink(){
@@ -40,6 +26,14 @@ void blink(){
   digitalWrite(LED_BUILTIN, HIGH);
   delay(2000);
 }
+
+void handleRoot() {
+  server.send(200, String("text/plain"), "Hello from: " + String(thingName)
+  + String(ESP.getVcc()) );
+  blink();
+}
+
+
 
 void handleNotFound(){
   String message = "File Not Found\n\n";
@@ -75,7 +69,7 @@ void setup() {
   }
 
 
-
+  // Main webserver setup
 
   server.on("/", handleRoot);
   server.onNotFound(handleNotFound);
