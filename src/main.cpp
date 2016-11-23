@@ -4,10 +4,12 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include "WiFiManager.h"
+#include "ESPAsyncUDP.h"
 
 #define BLYNK_PRINT Serial    // Comment this out to disable prints and save space
 #include <BlynkSimpleEsp8266.h>
 
+AsyncUDP udp;
 // ADC_MODE(ADC_VCC);
 
 char auth[] = "267fd313cf304419b503c178dcf60aab";
@@ -86,6 +88,31 @@ void setup() {
   // Serial.println("HTTP server started");
   Blynk.config(auth);
   Serial.println("Connected...");
+  // udp
+  if(udp.listen(1234)) {
+          Serial.print("UDP Listening on IP: ");
+          Serial.println(WiFi.localIP());
+          udp.onPacket([](AsyncUDPPacket packet) {
+              Serial.print("UDP Packet Type: ");
+              Serial.print(packet.isBroadcast()?"Broadcast":packet.isMulticast()?"Multicast":"Unicast");
+              Serial.print(", From: ");
+              Serial.print(packet.remoteIP());
+              Serial.print(":");
+              Serial.print(packet.remotePort());
+              Serial.print(", To: ");
+              Serial.print(packet.localIP());
+              Serial.print(":");
+              Serial.print(packet.localPort());
+              Serial.print(", Length: ");
+              Serial.print(packet.length());
+              Serial.print(", Data: ");
+              Serial.write(packet.data(), packet.length());
+              Serial.println();
+              //reply to the client
+              packet.printf("Got %u bytes of data", packet.length());
+          });
+      }
+
 
 }
 
@@ -93,4 +120,5 @@ void loop() {
   // Main Webserver
   // server.handleClient();
   Blynk.run();
+
 }
