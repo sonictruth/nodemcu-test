@@ -5,12 +5,12 @@
 #include <ESP8266mDNS.h>
 #include "WiFiManager.h"
 
-// Todo: reset wifi
-// https://github.com/esp8266/Arduino/tree/4897e0006b5b0123a2fa31f67b14a3fff65ce561/doc
+#define BLYNK_PRINT Serial    // Comment this out to disable prints and save space
+#include <BlynkSimpleEsp8266.h>
 
-ADC_MODE(ADC_VCC);
-MDNSResponder mdns;
-ESP8266WebServer server(8080); // Main webserver
+// ADC_MODE(ADC_VCC);
+
+char auth[] = "267fd313cf304419b503c178dcf60aab";
 
 char thingName[] = "AlexThing";
 
@@ -20,20 +20,21 @@ void configModeCallback (WiFiManager *myWiFiManager) {
   Serial.println(myWiFiManager->getConfigPortalSSID());
 }
 
-void blink(){
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(1000);
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(2000);
+BLYNK_WRITE(V1) {
+  int a = param.asInt();
+  Serial.println(a);
+  analogWrite(LED_BUILTIN, a);
 }
+
+// Main webserver
+/*
+MDNSResponder mdns;
+ESP8266WebServer server(8080);
 
 void handleRoot() {
   server.send(200, String("text/plain"), "Hello from: " + String(thingName)
   + String(ESP.getVcc()) );
-  blink();
 }
-
-
 
 void handleNotFound(){
   String message = "File Not Found\n\n";
@@ -49,12 +50,14 @@ void handleNotFound(){
   }
   server.send(404, "text/plain", message);
 }
+*/
 
 void setup() {
-  pinMode(LED_BUILTIN, OUTPUT);
-  ESP.getVcc();
   Serial.begin(115200);
-  Serial.println("Setup");
+
+  // pinMode(LED_BUILTIN, OUTPUT);
+  // ESP.getVcc();
+
   WiFiManager wifiManager;
   wifiManager.setAPCallback(configModeCallback);
 
@@ -64,24 +67,21 @@ void setup() {
     delay(1000);
   }
 
-  if (mdns.begin(thingName, WiFi.localIP())) {
-    Serial.println("MDNS responder started");
-  }
-
-
   // Main webserver setup
-
-  server.on("/", handleRoot);
-  server.onNotFound(handleNotFound);
-  server.begin();
-
-  Serial.println("HTTP server started");
+  // if (mdns.begin(thingName, WiFi.localIP())) {
+  //  Serial.println("MDNS responder started");
+  // }
+  // server.on("/", handleRoot);
+  // server.onNotFound(handleNotFound);
+  // server.begin();
+  // Serial.println("HTTP server started");
+  Blynk.config(auth);
   Serial.println("Connected...");
 
 }
 
 void loop() {
-
-  server.handleClient();
-
+  // Main Webserver
+  // server.handleClient();
+  Blynk.run();
 }
