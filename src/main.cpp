@@ -11,6 +11,10 @@
 // ADC_MODE(ADC_VCC);
 
 char auth[] = "267fd313cf304419b503c178dcf60aab";
+static const uint8_t LED1   = 2; // D4
+static const uint8_t LED2   = 16; // D0
+static const uint8_t RESET_BTN   = 0; // D3
+
 
 char thingName[] = "AlexThing";
 
@@ -22,9 +26,13 @@ void configModeCallback (WiFiManager *myWiFiManager) {
 
 BLYNK_WRITE(V1) {
   int a = param.asInt();
-  Serial.println(a);
-  analogWrite(LED_BUILTIN, a);
+  analogWrite(LED1, a);
 }
+BLYNK_WRITE(V2) {
+  int a = param.asInt();
+  analogWrite(LED2, a);
+}
+
 
 // Main webserver
 /*
@@ -54,7 +62,8 @@ void handleNotFound(){
 
 void setup() {
   Serial.begin(115200);
-
+  pinMode(LED1, OUTPUT);
+  pinMode(LED2, OUTPUT);
   // pinMode(LED_BUILTIN, OUTPUT);
   // ESP.getVcc();
 
